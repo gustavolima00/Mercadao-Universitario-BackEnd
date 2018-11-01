@@ -1,2 +1,8 @@
 #Virtual Envoriment
 env/
+
+#Database
+backend/db.sqlite3
+
+#Pycache
+backend/backend/__pycache__/
