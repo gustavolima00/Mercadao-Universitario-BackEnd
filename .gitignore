@@ -2,7 +2,7 @@
 env/
 
 #Database
-mercadao/db.sqlite3
+backend/db.sqlite3
 
 #Pycache
-mercadao/mercadao/__pycache__/
+backend/backend/__pycache__/
