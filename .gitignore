@@ -1,0 +1,8 @@
+#Virtual Envoriment
+env/
+
+#Database
+mercadao/db.sqlite3
+
+#Pycache
+mercadao/mercadao/__pycache__/
