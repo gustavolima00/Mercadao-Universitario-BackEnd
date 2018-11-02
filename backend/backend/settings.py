@@ -47,8 +47,19 @@ INSTALLED_APPS = [
     'allauth.account',
     'rest_auth.registration',
     'profiles',
+    'django_nose',
 ]
 SITE_ID = 1
+
+#Test configuration 
+# Use nose to run all tests
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+# Tell nose to measure coverage on the 'foo' and 'bar' apps
+NOSE_ARGS = [
+    '--with-coverage',
+    '--cover-package=profiles',
+]
 
 #Email configurations
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
