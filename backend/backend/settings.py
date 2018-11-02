@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'rest_auth.registration',
     'profiles',
     'django_nose',
+    'cloudinary',
 ]
 SITE_ID = 1
 
