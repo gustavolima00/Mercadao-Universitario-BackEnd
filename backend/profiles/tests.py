@@ -55,4 +55,31 @@ class CheckProfileModelTest(APITestCase):
         profile = Profile(user=user)
         profile_user = profile.get_user()
 
-        self.assertEqual(profile_user, user)    
+        self.assertEqual(profile_user, user)
+
+class CheckProfileViewTest(APITestCase):
+    def test_create_profile(self):
+        user_request = {
+            'password1':'abc123abc123', 
+            'password2':'abc123abc123', 
+            'email': 'test_create_profile@teste.com',
+            'username': 'test_create_profile'
+        }
+        register_response = self.client.post('/rest-auth/registration/', user_request)
+        token=register_response.json()['token']
+        
+        #Invalid Token request
+        request_1 = {'jwt_token': 'invalid_token'}
+        response_1 = self.client.post('/profiles/create_profile/', request_1)
+        self.assertEqual(response_1.status_code, 403)
+        self.assertEqual(response_1.json(), {'error':'Usuário não identificado'})
+
+        # No photo or user request
+        request_2 = {'jwt_token': token}
+        request_3 = {'jwt_token': token, 'name':'sample_name'}
+        response_2 = self.client.post('/profiles/create_profile/', request_2)
+        response_3 = self.client.post('/profiles/create_profile/', request_3)
+        self.assertEqual(response_2.status_code, 400)
+        self.assertEqual(response_3.status_code, 400)
+        self.assertEqual(response_2.json(), {'error':'Falha na requisição'})
+        self.assertEqual(response_3.json(), {'error':'Falha na requisição'})
