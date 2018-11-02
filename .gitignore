@@ -6,6 +6,10 @@ backend/db.sqlite3
 
 #Pycache
 backend/backend/__pycache__/
+backend/profiles/__pycache__/
+
+#Migrations
+backend/profiles/migrations/
 
 #Settings Secret
 backend/backend/settings_secret.py
