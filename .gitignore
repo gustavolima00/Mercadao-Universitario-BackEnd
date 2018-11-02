@@ -9,3 +9,6 @@ backend/backend/__pycache__/
 
 #Settings Secret
 backend/backend/settings_secret.py
+
+#Coverage report
+backend/.coverage
