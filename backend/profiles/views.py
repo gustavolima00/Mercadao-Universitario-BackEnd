@@ -2,7 +2,9 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
+from .serializers import UserSerializer
 from .models import Profile
+from .serializers import ProfileSerializer
 from rest_framework.status import (
     HTTP_403_FORBIDDEN,
     HTTP_200_OK,
@@ -47,14 +49,8 @@ def create_profile(request):
         else:
             return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
 
-        profile_name = profile.get_name()
-        profile_photo = profile.get_photo()
-
-        return Response(data={
-            'username':username, 
-            'name': profile_name, 
-            'photo': profile_photo,
-            },status=HTTP_200_OK)
+        serializer = ProfileSerializer(profile)
+        return Response(data=serializer.data,status=HTTP_200_OK)
 
 
 @api_view(["POST"])
@@ -84,12 +80,6 @@ def update_profile(request):
         photo_url = photo['url']
         profile.set_photo(photo_url)
 
-    profile_name = profile.get_name()
-    profile_photo = profile.get_photo()
-
-    return Response(data={
-        'username':username, 
-        'name': profile_name, 
-        'photo': profile_photo,
-        },status=HTTP_200_OK)
+    serializer = ProfileSerializer(profile)
+    return Response(data=serializer.data,status=HTTP_200_OK)
 

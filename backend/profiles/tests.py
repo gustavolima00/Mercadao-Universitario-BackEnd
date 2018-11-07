@@ -2,6 +2,7 @@ from django.test import TestCase
 from rest_framework.test import APITestCase
 from .models import Profile
 from django.contrib.auth.models import User
+from .serializers import ProfileSerializer
 
 class CheckProfileModelTest(APITestCase):
     def test_get_name(self):
@@ -57,6 +58,38 @@ class CheckProfileModelTest(APITestCase):
 
         self.assertEqual(profile_user, user)
 
+    def test_set_seller(self):
+        #Registro do usuário
+        user = User.objects.create_user('test_set_seller', 'test_set_seller@teste.com', 'testpassword')
+        
+        #Criação do profile
+        profile = Profile(user=user)
+        profile.set_seller()
+        self.assertTrue(profile.is_seller())
+
+    def test_set_buyer(self):
+         #Registro do usuário
+        user = User.objects.create_user('test_set_buyer', 'test_set_buyer@teste.com', 'testpassword')
+
+        #Criação do profile
+        profile = Profile(user=user)
+
+        profile.set_buyer()
+        self.assertFalse(profile.is_seller())
+
+    def test_is_seller(self):
+        #Registro do usuário
+        user = User.objects.create_user('test_is_seller', 'test_is_seller@teste.com', 'testpassword')
+
+        #Criação do profile
+        profile = Profile(user=user)
+
+        self.assertFalse(profile.is_seller())
+        profile.set_seller()
+        self.assertTrue(profile.is_seller())
+        profile.set_buyer()
+        self.assertFalse(profile.is_seller())
+
 class CheckProfileViewTest(APITestCase):
     def test_create_profile(self):
         user_request = {
@@ -83,19 +116,18 @@ class CheckProfileViewTest(APITestCase):
         #If is ok 
         request_3 = {'jwt_token': token, 'name':'sample_name'}
         response_3 = self.client.post('/profiles/create_profile/', request_3)
+        user = User.objects.get(username = 'test_create_profile')
+        profile = Profile.objects.get(user=user)
+        serializer = ProfileSerializer(profile)
         self.assertEqual(response_3.status_code, 200)
-        self.assertEqual(response_3.json(), {
-            'username':'test_create_profile',
-            'name': 'sample_name',
-            'photo': 'http://res.cloudinary.com/gustavolima00/image/upload/v1541203047/sd1gfqk6wqx5eo4hqn2a.png'
-            })
+        self.assertEqual(response_3.json(), serializer.data)
 
     def test_update_profile(self):
         user_request = {
             'password1':'abc123abc123', 
             'password2':'abc123abc123', 
-            'email': 'test_create_profile@teste.com',
-            'username': 'test_create_profile'
+            'email': 'test_update_profile@teste.com',
+            'username': 'test_update_profile'
         }
         register_response = self.client.post('/rest-auth/registration/', user_request)
         token=register_response.json()['token']
@@ -119,8 +151,7 @@ class CheckProfileViewTest(APITestCase):
         request_3 = {'jwt_token': token, 'name': 'new_name'}
         response_3 = self.client.post('/profiles/update_profile/', request_3)
         self.assertEqual(response_3.status_code, 200)
-        self.assertEqual(response_3.json(), {
-            'username':'test_create_profile',
-            'name': 'new_name',
-            'photo': 'http://res.cloudinary.com/gustavolima00/image/upload/v1541203047/sd1gfqk6wqx5eo4hqn2a.png'
-            })
+        user = User.objects.get(username = 'test_update_profile')
+        profile = Profile.objects.get(user=user)
+        serializer = ProfileSerializer(profile)
+        self.assertEqual(response_3.json(), serializer.data)
