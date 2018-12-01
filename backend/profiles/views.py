@@ -74,11 +74,13 @@ def update_profile(request):
         return Response({'error':'Perfil não encontrado'}, status=HTTP_404_NOT_FOUND)
 
     if(name):
-        profile.set_name(name)
+        profile.name=name
+        profile.save()
     if(photo_data):
         photo = cloudinary.uploader.upload(photo_data)
         photo_url = photo['url']
-        profile.set_photo(photo_url)
+        profile.photo=photo_url
+        profile.save()
 
     serializer = ProfileSerializer(profile)
     return Response(data=serializer.data,status=HTTP_200_OK)
