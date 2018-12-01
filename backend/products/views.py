@@ -131,6 +131,19 @@ def get_product(request):
     else:
         return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
 
+@api_view(["POST"])
+def user_products(request):
+    jwt_token = request.data.get('token')
+
+    #Autenticação do usuário
+    try:
+        user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
+        user_id = user_json['user_id']
+    except:
+        return Response({'error':'Usuário não identificado'}, status=HTTP_403_FORBIDDEN)
+
+    products = Product.objects.filter(vendor_id = user_id).values()
+    return Response(data=products, status=HTTP_200_OK)
 @api_view(["GET"])
 def all_products(request):
     products = Product.objects.all().values()
