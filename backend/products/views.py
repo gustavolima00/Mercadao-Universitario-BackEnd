@@ -144,6 +144,7 @@ def user_products(request):
 
     products = Product.objects.filter(vendor_id = user_id).values()
     return Response(data=products, status=HTTP_200_OK)
+    
 @api_view(["GET"])
 def all_products(request):
     products = Product.objects.all().values()

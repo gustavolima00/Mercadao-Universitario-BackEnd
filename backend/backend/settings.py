@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'rest_auth.registration',
     'profiles',
     'products',
+    'orders',
     'django_nose',
     'cloudinary',
 ]
