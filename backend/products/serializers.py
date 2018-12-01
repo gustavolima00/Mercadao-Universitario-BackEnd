@@ -4,7 +4,7 @@ from .models import Product
 class ProductSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
     created = serializers.DateTimeField()
-    fk_vendor = serializers.IntegerField()
+    vendor_id = serializers.IntegerField()
     name = serializers.CharField()
     price = serializers.FloatField()
     photo = serializers.CharField()

@@ -60,7 +60,10 @@ def delete_product(request):
         return Response({'error':'Usuário não identificado'}, status=HTTP_403_FORBIDDEN)
 
     if(product_id):
-        product = Product.objects.get(id=product_id)
+        try:
+            product = Product.objects.get(id=product_id)
+        except:
+            return Response({'error':'Produto não encontrado'}, status=HTTP_404_NOT_FOUND)
         if (product.vendor_id == user_id):
             product.delete()
             return Response({'sucess':'O produto foi deletado com sucesso'}, status=HTTP_200_OK )
@@ -71,13 +74,62 @@ def delete_product(request):
 
 @api_view(["POST"])
 def edit_product(request):
+    jwt_token = request.data.get('token')
+    product_id = request.data.get('product_id')
+    name = request.data.get('name')
+    price = request.data.get('price')
+    photo_data = request.data.get('photo')
 
-    return
+    #Autenticação do usuário
+    try:
+        user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
+        user_id = user_json['user_id']
+    except:
+        return Response({'error':'Usuário não identificado'}, status=HTTP_403_FORBIDDEN)
+
+    if(product_id):
+        try:
+            product = Product.objects.get(id=product_id)
+        except:
+            return Response({'error':'Produto não encontrado'}, status=HTTP_404_NOT_FOUND)
+        if (product.vendor_id == user_id):
+            if(price):
+                try:
+                    product.price = price
+                    product.save()
+                except:
+                    return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
+
+            if(name):
+                product.name = name
+                product.save()
+
+            if(photo_data):
+                photo = cloudinary.uploader.upload(photo_data)
+                photo_url = photo['url']
+                product.photo = photo_url
+                product.save()
+        else:
+            return Response({'error':'O produto não pertence ao usuário'}, status=HTTP_403_FORBIDDEN)
+
+        serializer = ProductSerializer(product)
+        return Response(data=serializer.data,status=HTTP_200_OK)
+    else:
+        return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
+
 
 @api_view(["POST"])
 def get_product(request):
-
-    return
+    product_id = request.data.get('product_id')
+    if(product_id):
+        try:
+            product = Product.objects.get(id=product_id)
+        except:
+            return Response({'error':'Produto não encontrado'}, status=HTTP_404_NOT_FOUND)
+        serializer = ProductSerializer(product)
+        return Response(data=serializer.data,status=HTTP_200_OK)
+    else:
+        return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
 
 @api_view(["GET"])
 def all_products(request):
