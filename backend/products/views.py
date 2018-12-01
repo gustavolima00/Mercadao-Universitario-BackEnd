@@ -38,7 +38,7 @@ def create_product(request):
             photo_url = DEFAULT_PHOTO
 
         try:
-            product = Product(fk_vendor=user_id, name=name, price=price, photo=photo_url)
+            product = Product(vendor_id=user_id, name=name, price=price, photo=photo_url)
             product.save()
         except:
             return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
@@ -50,8 +50,24 @@ def create_product(request):
 
 @api_view(["POST"])
 def delete_product(request):
+    jwt_token = request.data.get('token')
+    product_id = request.data.get('product_id')
+    #Autenticação e verificação do usuário
+    try:
+        user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
+        user_id = user_json['user_id']
+    except:
+        return Response({'error':'Usuário não identificado'}, status=HTTP_403_FORBIDDEN)
 
-    return
+    if(product_id):
+        product = Product.objects.get(id=product_id)
+        if (product.vendor_id == user_id):
+            product.delete()
+            return Response({'sucess':'O produto foi deletado com sucesso'}, status=HTTP_200_OK )
+        else:
+            return Response({'error':'O produto não pertence ao usuário'}, status=HTTP_403_FORBIDDEN)
+    else:
+        return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
 def edit_product(request):
