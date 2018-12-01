@@ -18,3 +18,24 @@ from backend.settings_secret import *
 def create_product(request):
 
     return
+
+@api_view(["POST"])
+def delete_product(request):
+
+    return
+
+@api_view(["POST"])
+def edit_product(request):
+
+    return
+
+@api_view(["POST"])
+def get_product(request):
+
+    return
+
+@api_view(["GET"])
+def all_products(request):
+    products = Product.objects.all()
+    serializer = ProductSerializer(products)
+    return Response(data=serializer.data,status=HTTP_200_OK)
