@@ -1,8 +1,6 @@
-from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from .serializers import UserSerializer
 from .models import Profile
 from .serializers import ProfileSerializer
 from rest_framework.status import (
@@ -10,16 +8,17 @@ from rest_framework.status import (
     HTTP_200_OK,
     HTTP_404_NOT_FOUND,
     HTTP_400_BAD_REQUEST,
-    HTTP_500_INTERNAL_SERVER_ERROR
 )
 import requests
 import jwt
 from backend.settings_secret import *
 
+DEFAULT_PHOTO = 'http://res.cloudinary.com/gustavolima00/image/upload/v1541203047/sd1gfqk6wqx5eo4hqn2a.png'
+
 @api_view(["POST"])
 def create_profile(request):
     #Requests
-    jwt_token = request.data.get('jwt_token')
+    jwt_token = request.data.get('token')
     name = request.data.get('name')
     photo_data = request.data.get('photo')
 
@@ -42,7 +41,7 @@ def create_profile(request):
             profile.save()
 
         elif(name and not photo_data):
-            photo_url = 'http://res.cloudinary.com/gustavolima00/image/upload/v1541203047/sd1gfqk6wqx5eo4hqn2a.png'
+            photo_url = DEFAULT_PHOTO
             profile = Profile(user=user, name=name, photo=photo_url)
             profile.save()
 
@@ -56,7 +55,7 @@ def create_profile(request):
 @api_view(["POST"])
 def update_profile(request):
     #Requests
-    jwt_token = request.data.get('jwt_token')
+    jwt_token = request.data.get('token')
     name = request.data.get('name')
     photo_data = request.data.get('photo')
 
@@ -74,11 +73,13 @@ def update_profile(request):
         return Response({'error':'Perfil não encontrado'}, status=HTTP_404_NOT_FOUND)
 
     if(name):
-        profile.set_name(name)
+        profile.name=name
+        profile.save()
     if(photo_data):
         photo = cloudinary.uploader.upload(photo_data)
         photo_url = photo['url']
-        profile.set_photo(photo_url)
+        profile.photo=photo_url
+        profile.save()
 
     serializer = ProfileSerializer(profile)
     return Response(data=serializer.data,status=HTTP_200_OK)
