@@ -13,10 +13,12 @@ import requests
 import jwt
 from backend.settings_secret import *
 
+DEFAULT_PHOTO = 'http://res.cloudinary.com/gustavolima00/image/upload/v1541203047/sd1gfqk6wqx5eo4hqn2a.png'
+
 @api_view(["POST"])
 def create_profile(request):
     #Requests
-    jwt_token = request.data.get('jwt_token')
+    jwt_token = request.data.get('token')
     name = request.data.get('name')
     photo_data = request.data.get('photo')
 
@@ -39,7 +41,7 @@ def create_profile(request):
             profile.save()
 
         elif(name and not photo_data):
-            photo_url = 'http://res.cloudinary.com/gustavolima00/image/upload/v1541203047/sd1gfqk6wqx5eo4hqn2a.png'
+            photo_url = DEFAULT_PHOTO
             profile = Profile(user=user, name=name, photo=photo_url)
             profile.save()
 
@@ -53,7 +55,7 @@ def create_profile(request):
 @api_view(["POST"])
 def update_profile(request):
     #Requests
-    jwt_token = request.data.get('jwt_token')
+    jwt_token = request.data.get('token')
     name = request.data.get('name')
     photo_data = request.data.get('photo')
 

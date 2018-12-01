@@ -14,10 +14,39 @@ import requests
 import jwt
 from backend.settings_secret import *
 
+DEFAULT_PHOTO = 'https://ecservice.rakuten.com.br/rux/wp-content/themes/RUX/images/no-photo.png'
+
 @api_view(["POST"])
 def create_product(request):
+    jwt_token = request.data.get('token')
+    name = request.data.get('name')
+    price = request.data.get('price')
+    photo_data = request.data.get('photo')
 
-    return
+    #Autenticação do usuário
+    try:
+        user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
+        user_id = user_json['user_id']
+    except:
+        return Response({'error':'Usuário não identificado'}, status=HTTP_403_FORBIDDEN)
+
+    if(name and price):
+        if(photo_data):
+            photo = cloudinary.uploader.upload(photo_data)
+            photo_url = photo['url']
+        else:
+            photo_url = DEFAULT_PHOTO
+
+        try:
+            product = Product(fk_vendor=user_id, name=name, price=price, photo=photo_url)
+            product.save()
+        except:
+            return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
+    else:
+        return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
+
+    serializer = ProductSerializer(product)
+    return Response(data=serializer.data,status=HTTP_200_OK)
 
 @api_view(["POST"])
 def delete_product(request):
@@ -36,6 +65,5 @@ def get_product(request):
 
 @api_view(["GET"])
 def all_products(request):
-    products = Product.objects.all()
-    serializer = ProductSerializer(products)
-    return Response(data=serializer.data,status=HTTP_200_OK)
+    products = Product.objects.all().values()
+    return Response(data=products,status=HTTP_200_OK)
