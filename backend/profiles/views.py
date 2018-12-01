@@ -1,8 +1,6 @@
-from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from .serializers import UserSerializer
 from .models import Profile
 from .serializers import ProfileSerializer
 from rest_framework.status import (
@@ -10,7 +8,6 @@ from rest_framework.status import (
     HTTP_200_OK,
     HTTP_404_NOT_FOUND,
     HTTP_400_BAD_REQUEST,
-    HTTP_500_INTERNAL_SERVER_ERROR
 )
 import requests
 import jwt
