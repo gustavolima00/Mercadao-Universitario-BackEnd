@@ -6,3 +6,17 @@ backend/db.sqlite3
 
 #Pycache
 backend/backend/__pycache__/
+backend/profiles/__pycache__/
+backend/products/__pycache__/
+backend/orders/__pycache__/
+
+#Migrations
+backend/profiles/migrations/
+backend/products/migrations/
+backend/orders/migrations/
+
+#Settings Secret
+backend/backend/settings_secret.py
+
+#Coverage report
+backend/.coverage

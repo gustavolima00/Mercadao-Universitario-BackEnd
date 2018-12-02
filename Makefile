@@ -1,14 +1,14 @@
 default:
-	pip install -r requirements.txt
-	cd backend && python manage.py makemigrations
-	cd backend && python manage.py migrate
-	cd backend && python manage.py runserver 0.0.0.0:8000
+	pip3 install -r requirements.txt
+	cd backend && python3 manage.py makemigrations
+	cd backend && python3 manage.py migrate
+	cd backend && python3 manage.py runserver 0.0.0.0:8000
 update:
-	pip install -r requirements.txt
-	cd backend && python manage.py makemigrations
-	cd backend && python manage.py migrate
+	pip3 install -r requirements.txt
+	cd backend && python3 manage.py makemigrations
+	cd backend && python3 manage.py migrate
 run:
-	cd backend && python manage.py runserver 0.0.0.0:8000
+	cd backend && python3 manage.py runserver 0.0.0.0:8000
 
 test:
-	cd backend && python manage.py test
+	cd backend && python3 manage.py test
