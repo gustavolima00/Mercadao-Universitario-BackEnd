@@ -9,5 +9,5 @@ class Order(models.Model):
     buyer_id = models.IntegerField()
     product_id = models.IntegerField()
     quantity = models.IntegerField()
-    status = models.TextField()
+    status = models.TextField(default= 'open')
 # Create your models here.
