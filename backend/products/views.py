@@ -1,6 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Product
+from profiles.models import Profile
+from django.contrib.auth.models import User
 from .serializers import ProductSerializer
 from rest_framework.status import (
     HTTP_403_FORBIDDEN,
@@ -23,9 +25,16 @@ def create_product(request):
     #Autenticação do usuário
     try:
         user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
-        user_id = user_json['user_id']
+        username = user_json['username']
+        user = User.objects.get(username = username)
     except:
         return Response({'error':'Usuário não identificado'}, status=HTTP_403_FORBIDDEN)
+
+    try:
+        profile = Profile.objects.get(user=user)
+
+    except Profile.DoesNotExist:
+        return Response({'error':'Usuário não possui perfil'}, status=HTTP_403_FORBIDDEN)
 
     if(name and price):
         if(photo_data):
@@ -35,7 +44,7 @@ def create_product(request):
             photo_url = DEFAULT_PHOTO
 
         try:
-            product = Product(vendor_id=user_id, name=name, price=price, photo=photo_url)
+            product = Product(vendor=profile, name=name, price=price, photo=photo_url)
             product.save()
         except:
             return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
@@ -49,19 +58,27 @@ def create_product(request):
 def delete_product(request):
     jwt_token = request.data.get('token')
     product_id = request.data.get('product_id')
-    #Autenticação e verificação do usuário
+
+    #Autenticação do usuário
     try:
         user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
-        user_id = user_json['user_id']
+        username = user_json['username']
+        user = User.objects.get(username = username)
     except:
         return Response({'error':'Usuário não identificado'}, status=HTTP_403_FORBIDDEN)
+
+    try:
+        profile = Profile.objects.get(user=user)
+
+    except Profile.DoesNotExist:
+        return Response({'error':'Usuário não possui perfil'}, status=HTTP_403_FORBIDDEN)
 
     if(product_id):
         try:
             product = Product.objects.get(id=product_id)
         except:
             return Response({'error':'Produto não encontrado'}, status=HTTP_404_NOT_FOUND)
-        if (product.vendor_id == user_id):
+        if (product.vendor == profile):
             product.delete()
             return Response({'sucess':'O produto foi deletado com sucesso'}, status=HTTP_200_OK )
         else:
@@ -80,16 +97,23 @@ def edit_product(request):
     #Autenticação do usuário
     try:
         user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
-        user_id = user_json['user_id']
+        username = user_json['username']
+        user = User.objects.get(username = username)
     except:
         return Response({'error':'Usuário não identificado'}, status=HTTP_403_FORBIDDEN)
+
+    try:
+        profile = Profile.objects.get(user=user)
+
+    except Profile.DoesNotExist:
+        return Response({'error':'Usuário não possui perfil'}, status=HTTP_403_FORBIDDEN)
 
     if(product_id):
         try:
             product = Product.objects.get(id=product_id)
         except:
             return Response({'error':'Produto não encontrado'}, status=HTTP_404_NOT_FOUND)
-        if (product.vendor_id == user_id):
+        if (product.vendor == profile):
             if(price):
                 try:
                     product.price = price
@@ -135,14 +159,23 @@ def user_products(request):
     #Autenticação do usuário
     try:
         user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
-        user_id = user_json['user_id']
+        username = user_json['username']
+        user = User.objects.get(username = username)
     except:
         return Response({'error':'Usuário não identificado'}, status=HTTP_403_FORBIDDEN)
 
-    products = Product.objects.filter(vendor_id = user_id).values()
-    return Response(data=products, status=HTTP_200_OK)
+    try:
+        profile = Profile.objects.get(user=user)
+
+    except Profile.DoesNotExist:
+        return Response({'error':'Usuário não possui perfil'}, status=HTTP_403_FORBIDDEN)
+
+    products = Product.objects.filter(vendor = profile)
+    serializer = ProductSerializer(products, many=True)
+    return Response(data=serializer.data,status=HTTP_200_OK)
     
 @api_view(["GET"])
 def all_products(request):
-    products = Product.objects.all().values()
-    return Response(data=products,status=HTTP_200_OK)
+    products = Product.objects.all()
+    serializer = ProductSerializer(products, many=True)
+    return Response(data=serializer.data,status=HTTP_200_OK)
