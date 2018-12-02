@@ -72,5 +72,34 @@ def buyer_orders(request):
 
 @api_view(["POST"])
 def set_order_status(request):
+    jwt_token = request.data.get('token')
+    order_id = request.data.get('order_id')
+    status = request.data.get('status')
+
+    #Autenticação do usuário
+    try:
+        user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
+        user_id = user_json['user_id']
+    except:
+        return Response({'error':'Usuário não identificado'}, status=HTTP_403_FORBIDDEN)
+
+    if(status and order_id):
+        try:
+            order = Order.objects.get(id=order_id)
+        except:
+            return Response({'error':'Pedido não encontrado'}, status=HTTP_404_NOT_FOUND)
+   
+        if(order.buyer_id !=  user_id or order.vendor_id !=  user_id):
+            return Response({'error':'Permissão negada'}, status=HTTP_403_FORBIDDEN)
+
+        if(status == 'open' or status == 'closed'):
+            order.status = status
+            order.save()
+            serializer = OrderSerializer(order)
+            return Response(data=serializer.data,status=HTTP_200_OK)
+        else:
+            return Response({'error':'Status inválido'}, status=HTTP_400_BAD_REQUEST)
+    else:
+        return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
     return
 
