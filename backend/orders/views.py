@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Product
-from .serializers import ProductSerializer
+from .models import Order
+from .serializers import OrderSerializer
 from rest_framework.status import (
     HTTP_403_FORBIDDEN,
     HTTP_200_OK,
@@ -14,4 +14,19 @@ import requests
 import jwt
 from backend.settings_secret import *
 
-# Create your views here.
+@api_view(["POST"])
+def create_order(request):
+    return
+
+@api_view(["POST"])
+def vendor_orders(request):
+    return
+
+@api_view(["POST"])
+def buyer_orders(request):
+    return
+
+@api_view(["POST"])
+def set_order_status(request):
+    return
+

@@ -9,4 +9,4 @@ class OrderSerializer(serializers.Serializer):
     vendor_id = serializers.IntegerField()
     product_id = serializers.IntegerField()
     quantity = serializers.IntegerField()
-    status = serializers.TextField()
+    status = serializers.CharField()
