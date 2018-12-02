@@ -46,11 +46,29 @@ def create_order(request):
 
 @api_view(["POST"])
 def vendor_orders(request):
-    return
+    jwt_token = request.data.get('token')
+    #Autenticação do usuário
+    try:
+        user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
+        user_id = user_json['user_id']
+    except:
+        return Response({'error':'Usuário não identificado'}, status=HTTP_403_FORBIDDEN)
+    
+    orders = Order.objects.filter(vendor_id = user_id).values()
+    return Response(data=orders, status=HTTP_200_OK)
 
 @api_view(["POST"])
 def buyer_orders(request):
-    return
+    jwt_token = request.data.get('token')
+    #Autenticação do usuário
+    try:
+        user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
+        user_id = user_json['user_id']
+    except:
+        return Response({'error':'Usuário não identificado'}, status=HTTP_403_FORBIDDEN)
+    
+    orders = Order.objects.filter(buyer_id = user_id).values()
+    return Response(data=orders, status=HTTP_200_OK)
 
 @api_view(["POST"])
 def set_order_status(request):
