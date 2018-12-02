@@ -21,7 +21,7 @@ def create_profile(request):
     jwt_token = request.data.get('token')
     name = request.data.get('name')
     photo_data = request.data.get('photo')
-
+    print('1')
     try:
         user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
         username = user_json['username']
