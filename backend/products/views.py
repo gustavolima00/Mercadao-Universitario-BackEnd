@@ -1,7 +1,12 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Product
-from profiles.models import Profile
+from profiles.models import (
+    Profile,
+    VENDOR_NOT_APPROVED,
+    VENDOR_APPROVED,
+    BUYER,
+)
 from django.contrib.auth.models import User
 from .serializers import ProductSerializer
 from rest_framework.status import (
@@ -32,6 +37,8 @@ def create_product(request):
 
     try:
         profile = Profile.objects.get(user=user)
+        if(profile.profile_type == BUYER):
+            return Response({'error':'Usuário não autorizado'}, status=HTTP_403_FORBIDDEN)
 
     except Profile.DoesNotExist:
         return Response({'error':'Usuário não possui perfil'}, status=HTTP_403_FORBIDDEN)
@@ -176,6 +183,7 @@ def user_products(request):
     
 @api_view(["GET"])
 def all_products(request):
-    products = Product.objects.all()
+    vendors = Profile.objects.filter( profile_type = VENDOR_APPROVED )
+    products = Product.objects.filter(vendor__in = vendors)
     serializer = ProductSerializer(products, many=True)
     return Response(data=serializer.data,status=HTTP_200_OK)
