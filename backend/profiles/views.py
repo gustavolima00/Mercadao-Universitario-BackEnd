@@ -45,7 +45,7 @@ def create_profile(request):
         return Response({'error':'Usuário já possui perfil'}, status=HTTP_400_BAD_REQUEST)
 
     except Profile.DoesNotExist:
-        if(not name):
+        if(not name or not profile_type):
             return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
 
         profile_type = int(profile_type)
@@ -95,10 +95,11 @@ def update_profile(request):
         profile.photo=photo_url
         profile.save()
 
-    profile_type = int(profile_type)
-    if(profile_type == VENDOR_NOT_APPROVED or profile_type == VENDOR_APPROVED or profile_type == BUYER):
-        profile.profile_type = profile_type
-        profile.save()
+    if(profile_type):
+        profile_type = int(profile_type)
+        if(profile_type == VENDOR_NOT_APPROVED or profile_type == VENDOR_APPROVED or profile_type == BUYER):
+            profile.profile_type = profile_type
+            profile.save()
 
     serializer = ProfileSerializer(profile)
     return Response(data=serializer.data,status=HTTP_200_OK)
