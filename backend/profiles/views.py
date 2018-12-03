@@ -9,11 +9,22 @@ from rest_framework.status import (
     HTTP_404_NOT_FOUND,
     HTTP_400_BAD_REQUEST,
 )
+from .models import (
+    VENDOR_NOT_APPROVED,
+    VENDOR_APPROVED,
+    BUYER,
+)
 import requests
 import jwt
 from backend.settings_secret import *
 
 DEFAULT_PHOTO = 'http://res.cloudinary.com/gustavolima00/image/upload/v1541203047/sd1gfqk6wqx5eo4hqn2a.png'
+
+@api_view(["GET"])
+def all_profiles(request):
+    profiles = Profile.objects.all()
+    serializer = ProfileSerializer(profiles, many=True)
+    return Response(data=serializer.data,status=HTTP_200_OK)
 
 @api_view(["POST"])
 def create_profile(request):
@@ -21,6 +32,7 @@ def create_profile(request):
     jwt_token = request.data.get('token')
     name = request.data.get('name')
     photo_data = request.data.get('photo')
+    profile_type = request.data.get('profile_type')
     try:
         user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
         username = user_json['username']
@@ -33,20 +45,22 @@ def create_profile(request):
         return Response({'error':'Usuário já possui perfil'}, status=HTTP_400_BAD_REQUEST)
 
     except Profile.DoesNotExist:
-        if(name and photo_data):
-            photo = cloudinary.uploader.upload(photo_data)
-            photo_url = photo['url']
-            profile = Profile(user=user, name=name, photo=photo_url)
-            profile.save()
-
-        elif(name and not photo_data):
-            photo_url = DEFAULT_PHOTO
-            profile = Profile(user=user, name=name, photo=photo_url)
-            profile.save()
-
-        else:
+        if(not name):
             return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
 
+        profile_type = int(profile_type)
+        if(profile_type != VENDOR_NOT_APPROVED and profile_type != VENDOR_APPROVED and profile_type != BUYER):
+            return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
+
+        if(photo_data):
+            photo = cloudinary.uploader.upload(photo_data)
+            photo_url = photo['url']
+
+        else:
+            photo_url = DEFAULT_PHOTO
+
+        profile = Profile(user=user, name=name, photo=photo_url, profile_type=profile_type)
+        profile.save()
         serializer = ProfileSerializer(profile)
         return Response(data=serializer.data,status=HTTP_200_OK)
 
@@ -57,6 +71,7 @@ def update_profile(request):
     jwt_token = request.data.get('token')
     name = request.data.get('name')
     photo_data = request.data.get('photo')
+    profile_type = request.data.get('profile_type')
 
     try:
         user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
@@ -78,6 +93,11 @@ def update_profile(request):
         photo = cloudinary.uploader.upload(photo_data)
         photo_url = photo['url']
         profile.photo=photo_url
+        profile.save()
+
+    profile_type = int(profile_type)
+    if(profile_type == VENDOR_NOT_APPROVED or profile_type == VENDOR_APPROVED or profile_type == BUYER):
+        profile.profile_type = profile_type
         profile.save()
 
     serializer = ProfileSerializer(profile)
