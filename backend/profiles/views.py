@@ -18,7 +18,7 @@ import requests
 import jwt
 from backend.settings_secret import *
 
-DEFAULT_PHOTO = 'http://res.cloudinary.com/gustavolima00/image/upload/v1541203047/sd1gfqk6wqx5eo4hqn2a.png'
+DEFAULT_PHOTO = 'https://i.imgur.com/UWQ0GOq.png'
 
 @api_view(["GET"])
 def all_profiles(request):
