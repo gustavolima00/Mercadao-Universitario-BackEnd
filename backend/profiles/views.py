@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from .models import Profile
+from .models import Location
 from .serializers import ProfileSerializer
 from rest_framework.status import (
     HTTP_403_FORBIDDEN,
@@ -53,13 +54,16 @@ def create_profile(request):
             return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
 
         if(photo_data):
-            photo = cloudinary.uploader.upload(photo_data)
+            photo = cloudinary.uploader.upload(photo_data, transformation = [
+                {'width': 1024, 'height': 1024, 'crop': 'fit'}, 
+            ])
             photo_url = photo['url']
 
         else:
             photo_url = DEFAULT_PHOTO
-
-        profile = Profile(user=user, name=name, photo=photo_url, profile_type=profile_type)
+        location = Location()
+        location.save()
+        profile = Profile(user=user, name=name, photo=photo_url, profile_type=profile_type, location=location)
         profile.save()
         serializer = ProfileSerializer(profile)
         return Response(data=serializer.data,status=HTTP_200_OK)
@@ -90,7 +94,9 @@ def update_profile(request):
         profile.name=name
         profile.save()
     if(photo_data):
-        photo = cloudinary.uploader.upload(photo_data)
+        photo = cloudinary.uploader.upload(photo_data, transformation = [
+                {'width': 1024, 'height': 1024, 'crop': 'fit'}, 
+            ])
         photo_url = photo['url']
         profile.photo=photo_url
         profile.save()

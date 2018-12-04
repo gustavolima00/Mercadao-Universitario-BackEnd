@@ -5,8 +5,14 @@ VENDOR_NOT_APPROVED = 2
 VENDOR_APPROVED = 3
 BUYER = 1
 
+class Location(models.Model):
+    latitude = models.FloatField(null=True, blank=True, default=None)
+    longitude = models.FloatField(null=True, blank=True, default=None)
+
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True,)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    location = models.OneToOneField(Location, on_delete=models.CASCADE)
     name = models.CharField(max_length=30, blank=True)
     photo = models.TextField(blank=True)
     profile_type = models.IntegerField( default=BUYER )
+
