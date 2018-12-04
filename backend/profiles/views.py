@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from .models import Profile
 from .models import Location
 from .serializers import ProfileSerializer
+from .serializers import LocationSerializer
 from rest_framework.status import (
     HTTP_403_FORBIDDEN,
     HTTP_200_OK,
@@ -110,3 +111,35 @@ def update_profile(request):
     serializer = ProfileSerializer(profile)
     return Response(data=serializer.data,status=HTTP_200_OK)
 
+@api_view(["POST"])
+def update_location(request):
+    #Requests
+    jwt_token = request.data.get('token')
+    latitude = request.data.get('latitude')
+    longitude = request.data.get('longitude')
+
+    try:
+        user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
+        username = user_json['username']
+        user = User.objects.get(username = username)
+    except:
+        return Response({'error':'Usuário não identificado'}, status=HTTP_403_FORBIDDEN)
+
+    try:
+        profile = Profile.objects.get(user=user)
+
+    except Profile.DoesNotExist:
+        return Response({'error':'Perfil não encontrado'}, status=HTTP_404_NOT_FOUND)
+
+    if(latitude and longitude):
+        try:
+            
+            profile.location.latitude=latitude
+            profile.location.longitude=longitude
+            profile.location.save()
+            serializer = LocationSerializer(profile.location)
+            return Response(data=serializer.data,status=HTTP_200_OK)
+        except:
+            return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
+    else:
+        return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
