@@ -14,4 +14,4 @@ class ProfileSerializer(serializers.Serializer):
     user = UserSerializer()
     name = serializers.CharField(max_length=30)
     photo = serializers.CharField()
-    profile_type = serializers.CharField()
+    profile_type = serializers.IntegerField()
