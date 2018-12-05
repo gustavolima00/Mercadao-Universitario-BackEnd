@@ -9,4 +9,5 @@ urlpatterns = [
     path('all_products/', views.all_products),
     path('user_products/', views.user_products),
     path('nearby_products/', views.nearby_products),
+    path('search_products/', views.search_products),
 ]

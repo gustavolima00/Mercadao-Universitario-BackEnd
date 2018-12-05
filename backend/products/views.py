@@ -215,3 +215,13 @@ def nearby_products(request):
     products = Product.objects.filter(vendor__in = profiles)
     serializer = ProductSerializer(products, many=True)
     return Response(data=serializer.data,status=HTTP_200_OK)
+
+@api_view(["POST"])
+def search_products(request):
+    name = request.data.get('name')
+
+    vendors = Profile.objects.filter(profile_type = VENDOR_APPROVED)
+    all_products = Product.objects.filter(vendor__in = vendors)
+    products = all_products.filter(name__contains=name)
+    serializer = ProductSerializer(products, many=True)
+    return Response(data=serializer.data,status=HTTP_200_OK)
