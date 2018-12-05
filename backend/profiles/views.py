@@ -143,3 +143,29 @@ def update_location(request):
             return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
     else:
         return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+def clear_location(request):
+    #Requests
+    jwt_token = request.data.get('token')
+    latitude = request.data.get('latitude')
+    longitude = request.data.get('longitude')
+
+    try:
+        user_json = jwt.decode(jwt_token, SECRET_KEY, algorithms=['HS256'])
+        username = user_json['username']
+        user = User.objects.get(username = username)
+    except:
+        return Response({'error':'Usuário não identificado'}, status=HTTP_403_FORBIDDEN)
+
+    try:
+        profile = Profile.objects.get(user=user)
+
+    except Profile.DoesNotExist:
+        return Response({'error':'Perfil não encontrado'}, status=HTTP_404_NOT_FOUND)
+
+    profile.location.latitude=None
+    profile.location.longitude=None
+    profile.location.save()
+    serializer = LocationSerializer(profile.location)
+    return Response(data=serializer.data,status=HTTP_200_OK)
