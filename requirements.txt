@@ -6,4 +6,5 @@ djangorestframework-jwt==1.11.0
 coverage==4.5.1
 django-nose==1.4.6
 cloudinary==1.14.0
+geopy==1.18.0
 

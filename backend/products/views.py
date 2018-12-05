@@ -17,6 +17,7 @@ from rest_framework.status import (
 )
 import jwt
 from backend.settings_secret import *
+import geopy.distance
 
 DEFAULT_PHOTO = 'https://ecservice.rakuten.com.br/rux/wp-content/themes/RUX/images/no-photo.png'
 
@@ -183,7 +184,34 @@ def user_products(request):
     
 @api_view(["GET"])
 def all_products(request):
-    vendors = Profile.objects.filter( profile_type = VENDOR_APPROVED )
+    vendors = Profile.objects.filter(profile_type = VENDOR_APPROVED)
     products = Product.objects.filter(vendor__in = vendors)
+    serializer = ProductSerializer(products, many=True)
+    return Response(data=serializer.data,status=HTTP_200_OK)
+
+@api_view(["POST"])
+def nearby_products(request):
+    #Requests
+    latitude1 = request.data.get('latitude')
+    longitude1 = request.data.get('longitude')
+    min_distance = request.data.get('distance')
+
+    if(latitude1 and longitude1 and min_distance):
+        profiles = []
+        for profile in Profile.objects.filter(profile_type = VENDOR_APPROVED):
+            if(profile.location.latitude and profile.location.longitude):
+                latitude2=float(profile.location.latitude)
+                longitude2=float(profile.location.longitude)
+                coords_1 = (latitude1, longitude1)
+                coords_2 = (latitude2, longitude2)
+                distance = geopy.distance.vincenty(coords_1, coords_2).m
+                if(distance<float(min_distance)):
+                    profiles.append(profile)
+                print('distance', distance)
+    else:
+        return Response({'error':'Falha na requisição'}, status=HTTP_400_BAD_REQUEST)
+
+    print(profiles)
+    products = Product.objects.filter(vendor__in = profiles)
     serializer = ProductSerializer(products, many=True)
     return Response(data=serializer.data,status=HTTP_200_OK)

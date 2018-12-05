@@ -169,3 +169,6 @@ def clear_location(request):
     profile.location.save()
     serializer = LocationSerializer(profile.location)
     return Response(data=serializer.data,status=HTTP_200_OK)
+
+
+    
